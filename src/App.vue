@@ -2,30 +2,51 @@
   #app
     img(src='./assets/logo.png')
     h1 vue-lastfm
+    select(v-model="selectedCountry")
+      option(v-for="country in countries" v-bind:value="country.value" ) {{ country.name }}
     ul
-      artist(v-for="artist in artists" v-bind:artist="artist" v-bind:key="artist.mbid")
+      artist(v-for="artist in artists" v-bind:artist="artist" v-bind:key="uuid")
 </template>
 
 <script>
 import Artist from './components/Artist.vue';
 import getArtists from './api/';
+import uuid from 'uuid/v4';
 
 export default {
   name: 'app',
   data () {
     return {
-      artists: []
+      uuid: uuid(),
+      artists: [],
+      countries: [
+        { id: uuid(), name: 'Argentina', value: 'argentina' },
+        { id: uuid(), name: 'Colombia', value: 'colombia' },
+        { id: uuid(), name: 'Mexico', value: 'mexico' },
+        { id: uuid(), name: 'España', value: 'spain' }
+      ],
+      selectedCountry: 'argentina'
     }
   },
   components: {
     Artist
   },
-  mounted: function() {
-    const self = this;
-    getArtists()
-      .then(function(artists) {
-        self.artists = artists;
-      });
+  methods: {
+    refreshArtists() {
+      const self = this;
+      getArtists(this.selectedCountry)
+        .then(function(artists) {
+          self.artists = artists;
+        });
+    }
+  },
+  mounted() {
+    this.refreshArtists();
+  },
+  watch: {
+    selectedCountry() {
+      this.refreshArtists();
+    }
   }
 }
 </script>
